@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Subtitle Sync for Netflix</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="app-header">
+        <img class="app-icon" src="icons/icon32.png" width="28" height="28" alt="" />
+        <div class="app-title">
+          <h1>Subtitle Sync</h1>
+          <p class="app-subtitle">for Netflix &middot; unofficial</p>
+        </div>
+      </header>
+
+      <section class="file-section">
+        <label id="dropzone" class="dropzone" for="fileInput" tabindex="0">
+          <input type="file" id="fileInput" accept=".srt,.vtt,text/vtt,text/plain" hidden />
+          <svg class="dropzone-icon" width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect x="2.5" y="5.5" width="19" height="13" rx="2" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M6 14.5H10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            <path d="M12.5 14.5H18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+          <span class="dropzone-text">
+            <strong>Choose a subtitle file</strong>
+            <span class="dropzone-hint">.srt or .vtt &mdash; or drop it here</span>
+          </span>
+        </label>
+
+        <div id="fileInfo" class="file-info" hidden>
+          <svg class="file-info-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect x="2.5" y="5.5" width="19" height="13" rx="2" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M6 14.5H10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            <path d="M12.5 14.5H18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+          <div class="file-meta">
+            <div class="file-name" id="fileName"></div>
+            <div class="file-lines" id="fileLines"></div>
+          </div>
+          <button id="clearBtn" class="icon-btn" title="Remove subtitle file" aria-label="Remove subtitle file">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M5 5L19 19M19 5L5 19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+      </section>
+
+      <section class="controls">
+        <div class="control-row">
+          <span class="control-label">Show subtitles</span>
+          <label class="switch">
+            <input type="checkbox" id="enabled" checked />
+            <span class="switch-track"><span class="switch-thumb"></span></span>
+          </label>
+        </div>
+
+        <div class="control-row">
+          <span class="control-label">Sync offset</span>
+          <div class="stepper">
+            <button id="offsetMinus" class="stepper-btn" aria-label="Decrease offset by half a second">&minus;</button>
+            <button id="offsetValue" class="stepper-value" title="Reset to 0.0s">+0.0s</button>
+            <button id="offsetPlus" class="stepper-btn" aria-label="Increase offset by half a second">+</button>
+          </div>
+        </div>
+
+        <div class="control-row">
+          <span class="control-label">Font size</span>
+          <div class="font-size-control">
+            <input type="range" id="fontSize" min="14" max="48" step="1" />
+            <span class="font-preview" id="fontPreview" aria-hidden="true">Aa</span>
+            <span class="font-value" id="fontSizeValue"></span>
+          </div>
+        </div>
+      </section>
+
+      <p class="hint">Open a Netflix title, then choose a file above. If lines drift, nudge the sync offset.</p>
+    </div>
+  </body>
+  <script src="subtitleParser.js"></script>
+  <script src="popup.js"></script>
+</html>

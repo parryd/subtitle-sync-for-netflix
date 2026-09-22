@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "Subtitle Sync for Netflix",
+  "version": "1.0.0",
+  "description": "Load your own SRT/VTT subtitle file and have it displayed over Netflix, synced automatically to playback time and speed. Unofficial, not affiliated with Netflix.",
+  "permissions": ["storage"],
+  "host_permissions": ["*://*.netflix.com/*"],
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Subtitle Sync for Netflix",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.netflix.com/*"],
+      "js": ["subtitleParser.js", "content.js"],
+      "css": ["overlay.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}
