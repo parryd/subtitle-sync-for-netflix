@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Subtitle Sync for Netflix",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Overlay your own SRT/VTT subtitles on Netflix, synced to playback time and speed. Unofficial, not affiliated with Netflix.",
   "permissions": ["storage"],
   "host_permissions": ["*://*.netflix.com/*"],
