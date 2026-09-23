@@ -20,10 +20,26 @@
     '[data-uia="previewModal--player-titleTreatment-logo"]',
   ];
 
+  // Netflix renders "Show Name", "E7", "Episode Title" as separate
+  // sibling elements with no whitespace text node between them, so plain
+  // el.textContent runs them together (e.g. "Show NameE7Episode Title").
+  // Walking the text nodes and joining them with spaces avoids that.
+  function extractSpacedText(el) {
+    const parts = [];
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    let node;
+    while ((node = walker.nextNode())) {
+      const t = node.textContent.trim();
+      if (t) parts.push(t);
+    }
+    const text = parts.length ? parts.join(' ') : el.textContent.trim();
+    return text.replace(/\s+/g, ' ').trim();
+  }
+
   function detectTitleText() {
     for (const sel of TITLE_SELECTORS) {
       const el = document.querySelector(sel);
-      const text = el && el.textContent.trim().replace(/\s+/g, ' ');
+      const text = el && extractSpacedText(el);
       if (text) return text;
     }
     return null;
