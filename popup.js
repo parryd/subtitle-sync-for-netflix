@@ -13,7 +13,23 @@ const fontSizeInput = document.getElementById('fontSize');
 const fontSizeValueEl = document.getElementById('fontSizeValue');
 const fontPreviewEl = document.getElementById('fontPreview');
 
+const nowPlayingEl = document.getElementById('nowPlaying');
+const nowPlayingTitleEl = document.getElementById('nowPlayingTitle');
+const searchSubtitlesLink = document.getElementById('searchSubtitlesLink');
+
 let offset = 0;
+
+function showNowPlaying(title) {
+  if (!title) {
+    nowPlayingEl.hidden = true;
+    return;
+  }
+  nowPlayingEl.hidden = false;
+  nowPlayingTitleEl.textContent = title;
+  nowPlayingTitleEl.title = title;
+  searchSubtitlesLink.href =
+    'https://www.google.com/search?q=' + encodeURIComponent(title + ' subtitles srt');
+}
 
 function formatOffset(o) {
   return (o >= 0 ? '+' : '') + o.toFixed(1) + 's';
@@ -52,7 +68,7 @@ async function loadFile(file) {
 
 function init() {
   chrome.storage.local.get(
-    ['subtitleText', 'subtitleName', 'enabled', 'offset', 'fontSize'],
+    ['subtitleText', 'subtitleName', 'enabled', 'offset', 'fontSize', 'detectedTitle'],
     (data) => {
       enabledCheckbox.checked = data.enabled !== false;
 
@@ -65,6 +81,8 @@ function init() {
 
       const cueCount = data.subtitleText ? parseSubtitles(data.subtitleText).length : 0;
       refreshStatus(data.subtitleName, cueCount);
+
+      showNowPlaying(data.detectedTitle || null);
     }
   );
 }

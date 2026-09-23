@@ -7,8 +7,39 @@
   let videoEl = null;
   let overlay = null;
   let playerContainer = null;
+  let detectedTitle = null;
 
   const CONTROLS_SELECTOR = '.watch-video--bottom-controls-container';
+
+  // Netflix has changed these attributes before, so try a few in order
+  // and fall back to null (search link just stays hidden) rather than
+  // guessing at obfuscated class names.
+  const TITLE_SELECTORS = [
+    '[data-uia="video-title"]',
+    '[data-uia="player-title"]',
+    '[data-uia="previewModal--player-titleTreatment-logo"]',
+  ];
+
+  function detectTitleText() {
+    for (const sel of TITLE_SELECTORS) {
+      const el = document.querySelector(sel);
+      const text = el && el.textContent.trim().replace(/\s+/g, ' ');
+      if (text) return text;
+    }
+    return null;
+  }
+
+  function updateDetectedTitle() {
+    const title = detectTitleText();
+    if (title !== detectedTitle) {
+      detectedTitle = title;
+      if (title) {
+        chrome.storage.local.set({ detectedTitle: title });
+      } else {
+        chrome.storage.local.remove('detectedTitle');
+      }
+    }
+  }
 
   function findVideo() {
     return document.querySelector('video');
@@ -52,6 +83,7 @@
     videoEl.addEventListener('timeupdate', onTimeUpdate);
     onTimeUpdate();
     updateControlsVisibility();
+    updateDetectedTitle();
   }
 
   // Netflix removes its control bar from the DOM entirely when it fades out
@@ -138,6 +170,7 @@
   const observer = new MutationObserver(() => {
     attach();
     updateControlsVisibility();
+    updateDetectedTitle();
   });
   observer.observe(document.documentElement, { childList: true, subtree: true });
 

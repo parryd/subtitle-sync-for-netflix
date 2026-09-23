@@ -26,6 +26,11 @@ synced to playback time and speed.
    (each click nudges by 0.5s) until they line up.
 5. "Show subtitles" toggles the overlay on/off without clearing the file.
    "Clear subtitles" removes the loaded file entirely.
+6. If the popup detects a title/episode from the page, it shows a "Now
+   playing" card with a "Search for subtitles" link. This opens a normal
+   web search in a new tab for you to find and download a subtitle file
+   from wherever you'd normally get one — the extension does not fetch or
+   host subtitle files itself.
 
 ## How it works
 
@@ -40,6 +45,11 @@ synced to playback time and speed.
 - A `MutationObserver` (plus a 2s fallback poll) re-attaches the overlay
   when Netflix's single-page app swaps in a new `<video>` element, e.g.
   when you switch episodes or navigate away and back.
+- `content.js` also reads the title/episode text Netflix already displays
+  in its own player UI (`[data-uia="video-title"]`, with a couple of
+  fallback selectors) and writes it to storage. The popup uses this only
+  to build a plain web-search link — it never downloads or serves
+  subtitle content on your behalf.
 
 ## Limitations
 
