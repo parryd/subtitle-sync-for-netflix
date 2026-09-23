@@ -4,7 +4,14 @@ An unofficial Chrome extension (not affiliated with Netflix) that overlays
 your own subtitle file on top of a playing Netflix video, automatically
 synced to playback time and speed.
 
-## Load it in Chrome
+[**Get it on the Chrome Web Store**](https://chromewebstore.google.com/detail/Subtitle%20Sync%20for%20Netflix/cijfbacbdamencmlijfdfonkfkfacogf)
+
+## Install
+
+**From the Chrome Web Store (recommended):** click the link above and hit
+"Add to Chrome."
+
+**From source, for development:**
 
 1. Go to `chrome://extensions`.
 2. Enable "Developer mode" (top right).
