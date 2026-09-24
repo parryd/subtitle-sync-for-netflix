@@ -175,6 +175,99 @@ body {
   color: var(--danger);
 }
 
+.folder-section {
+  margin-bottom: 12px;
+}
+
+.folder-btn[hidden],
+.folder-info[hidden] {
+  display: none;
+}
+
+.folder-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+}
+
+.folder-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+
+.folder-btn strong {
+  display: block;
+  font-size: 12.5px;
+  color: var(--ink);
+}
+
+.folder-btn-hint {
+  display: block;
+  font-size: 10.5px;
+  color: var(--ink-soft);
+  margin-top: 1px;
+  line-height: 1.3;
+}
+
+.folder-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.folder-info-icon {
+  flex-shrink: 0;
+  color: var(--accent);
+}
+
+.folder-meta {
+  min-width: 0;
+  flex: 1;
+}
+
+.folder-name {
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.folder-status {
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin-top: 1px;
+}
+
+.text-btn {
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  color: var(--accent);
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 2px;
+}
+
+.text-btn:hover {
+  text-decoration: underline;
+}
+
 .now-playing[hidden] {
   display: none;
 }

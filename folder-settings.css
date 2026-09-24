@@ -1,0 +1,152 @@
+:root {
+  --bg: #ffffff;
+  --ink: #16181d;
+  --ink-soft: #6b7280;
+  --border: #e3e5e9;
+  --surface: #f6f7f9;
+  --accent: #0f9d66;
+  --danger: #d64545;
+  --radius: 10px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1c1e22;
+    --ink: #f1f2f4;
+    --ink-soft: #9aa0aa;
+    --border: #33363c;
+    --surface: #26292f;
+    --accent: #22c37e;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.page {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 32px 20px;
+}
+
+.page-header {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.page-header img {
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.page-header h1 {
+  font-size: 18px;
+  margin: 0 0 4px;
+}
+
+.page-subtitle {
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.folder-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px;
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.folder-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+
+.folder-btn[hidden],
+.folder-info[hidden] {
+  display: none;
+}
+
+.folder-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  flex-wrap: wrap;
+}
+
+.folder-info-icon {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.folder-meta {
+  flex: 1;
+  min-width: 160px;
+}
+
+.folder-name {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.folder-status {
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin-top: 2px;
+}
+
+.text-btn {
+  border: none;
+  background: transparent;
+  color: var(--accent);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 2px;
+}
+
+.text-btn:hover {
+  text-decoration: underline;
+}
+
+.text-btn.danger {
+  color: var(--danger);
+}
+
+.hint {
+  font-size: 12px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+  margin-top: 20px;
+}
+
+.hint code {
+  background: var(--surface);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 11.5px;
+}

@@ -17,6 +17,13 @@ const nowPlayingEl = document.getElementById('nowPlaying');
 const nowPlayingTitleEl = document.getElementById('nowPlayingTitle');
 const searchSubtitlesLink = document.getElementById('searchSubtitlesLink');
 
+const chooseFolderBtn = document.getElementById('chooseFolderBtn');
+const folderInfo = document.getElementById('folderInfo');
+const folderNameEl = document.getElementById('folderName');
+const folderStatusEl = document.getElementById('folderStatus');
+const folderManageBtn = document.getElementById('folderManageBtn');
+const folderStopBtn = document.getElementById('folderStopBtn');
+
 let offset = 0;
 let currentDetectedTitle = null;
 
@@ -80,6 +87,182 @@ async function loadFile(file) {
   }
 }
 
+// -- Subtitle folder ---------------------------------------------------
+// Lets you grant access to a folder of subtitle files once; on later
+// visits (to this exact episode), a matching file is loaded automatically
+// via folderMatcher.js instead of you picking it by hand each time. The
+// directory handle is stored in IndexedDB (chrome.storage can't hold a
+// FileSystemHandle) and Chrome persists the read permission for it across
+// browser sessions on its own.
+
+const IDB_NAME = 'subtitle-sync-folder';
+const IDB_STORE = 'handles';
+const FOLDER_KEY = 'subtitleFolderHandle';
+
+function idbOpen() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(IDB_NAME, 1);
+    req.onupgradeneeded = () => req.result.createObjectStore(IDB_STORE);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function idbGet(key) {
+  const db = await idbOpen();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_STORE, 'readonly');
+    const req = tx.objectStore(IDB_STORE).get(key);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function idbDelete(key) {
+  const db = await idbOpen();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(IDB_STORE, 'readwrite');
+    tx.objectStore(IDB_STORE).delete(key);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function ensurePermission(handle, requestIfNeeded) {
+  const opts = { mode: 'read' };
+  if ((await handle.queryPermission(opts)) === 'granted') return true;
+  if (!requestIfNeeded) return false;
+  try {
+    return (await handle.requestPermission(opts)) === 'granted';
+  } catch (err) {
+    return false;
+  }
+}
+
+async function listSubtitleFiles(dirHandle) {
+  const names = [];
+  for await (const [name, entry] of dirHandle.entries()) {
+    if (entry.kind === 'file' && /\.(srt|vtt)$/i.test(name)) {
+      names.push(name);
+    }
+  }
+  return names;
+}
+
+async function readFileFromFolder(dirHandle, name) {
+  const fileHandle = await dirHandle.getFileHandle(name);
+  const file = await fileHandle.getFile();
+  return file.text();
+}
+
+function showFolderConfigured(name, status) {
+  chooseFolderBtn.hidden = true;
+  folderInfo.hidden = false;
+  folderNameEl.textContent = name;
+  folderNameEl.title = name;
+  folderStatusEl.textContent = status;
+}
+
+function showFolderUnconfigured() {
+  chooseFolderBtn.hidden = false;
+  folderInfo.hidden = true;
+}
+
+// Loads a matching file from the folder for `title`, if any -- and, like a
+// manual load, saves it into subtitleLibrary so content.js's per-episode
+// reconciliation stays consistent either way.
+async function applyFolderMatch(dirHandle, title) {
+  const names = await listSubtitleFiles(dirHandle);
+  const match = window.pickBestMatch(title, names);
+  if (!match) return null;
+
+  const text = await readFileFromFolder(dirHandle, match);
+  const cues = parseSubtitles(text);
+  chrome.storage.local.set({ subtitleText: text, subtitleName: match }, () => {
+    refreshStatus(match, cues.length);
+  });
+  chrome.storage.local.get(['subtitleLibrary'], (data) => {
+    const library = data.subtitleLibrary || {};
+    library[title] = { text, name: match };
+    chrome.storage.local.set({ subtitleLibrary: library });
+  });
+  return match;
+}
+
+// Only auto-fills when nothing's already loaded for this exact episode,
+// so it never clobbers a manual pick you made on purpose.
+async function maybeAutoMatch(dirHandle) {
+  if (!currentDetectedTitle) return;
+  const data = await new Promise((resolve) =>
+    chrome.storage.local.get(['subtitleLibrary'], resolve)
+  );
+  const library = data.subtitleLibrary || {};
+  if (library[currentDetectedTitle]) return;
+
+  try {
+    const match = await applyFolderMatch(dirHandle, currentDetectedTitle);
+    if (match) {
+      folderStatusEl.textContent = `Auto-loaded: ${match}`;
+    }
+  } catch (err) {
+    // Folder may have been moved/deleted since -- fail quietly, manual
+    // load still works.
+  }
+}
+
+async function initFolder() {
+  if (!window.showDirectoryPicker) {
+    chooseFolderBtn.hidden = true;
+    return;
+  }
+
+  let handle;
+  try {
+    handle = await idbGet(FOLDER_KEY);
+  } catch (err) {
+    handle = null;
+  }
+
+  if (!handle) {
+    showFolderUnconfigured();
+    return;
+  }
+
+  const granted = await ensurePermission(handle, false);
+  if (!granted) {
+    showFolderConfigured(handle.name, 'Access needed — click to reconnect');
+    folderStatusEl.onclick = async () => {
+      const ok = await ensurePermission(handle, true);
+      if (ok) {
+        showFolderConfigured(handle.name, 'Ready');
+        folderStatusEl.onclick = null;
+        await maybeAutoMatch(handle);
+      }
+    };
+    return;
+  }
+
+  showFolderConfigured(handle.name, 'Ready');
+  await maybeAutoMatch(handle);
+}
+
+// Choosing/changing the folder needs window.showDirectoryPicker(), which
+// opens a native OS dialog -- and Chrome extension popups close the
+// instant they lose focus, which a native dialog does immediately. So
+// that action always opens the dedicated folder-settings page (a regular
+// tab, which doesn't have this problem) instead of running here.
+function openFolderSettings() {
+  chrome.tabs.create({ url: chrome.runtime.getURL('folder-settings.html') });
+}
+
+chooseFolderBtn.addEventListener('click', openFolderSettings);
+folderManageBtn.addEventListener('click', openFolderSettings);
+
+folderStopBtn.addEventListener('click', async () => {
+  await idbDelete(FOLDER_KEY);
+  showFolderUnconfigured();
+});
+
 function init() {
   chrome.storage.local.get(
     ['subtitleText', 'subtitleName', 'enabled', 'offset', 'fontSize', 'detectedTitle'],
@@ -98,6 +281,8 @@ function init() {
 
       currentDetectedTitle = data.detectedTitle || null;
       showNowPlaying(currentDetectedTitle);
+
+      initFolder();
     }
   );
 }

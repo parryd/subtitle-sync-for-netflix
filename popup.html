@@ -47,6 +47,34 @@
         </div>
       </section>
 
+      <section class="folder-section">
+        <button id="chooseFolderBtn" class="folder-btn" hidden>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M3 6.5A1.5 1.5 0 0 1 4.5 5H9l2 2h8.5A1.5 1.5 0 0 1 21 8.5v10A1.5 1.5 0 0 1 19.5 20h-15A1.5 1.5 0 0 1 3 18.5v-12Z" stroke="currentColor" stroke-width="1.6"/>
+          </svg>
+          <span>
+            <strong>Use a subtitle folder</strong>
+            <span class="folder-btn-hint">Point it at a folder of files &mdash; matching episodes load automatically</span>
+          </span>
+        </button>
+
+        <div id="folderInfo" class="folder-info" hidden>
+          <svg class="folder-info-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M3 6.5A1.5 1.5 0 0 1 4.5 5H9l2 2h8.5A1.5 1.5 0 0 1 21 8.5v10A1.5 1.5 0 0 1 19.5 20h-15A1.5 1.5 0 0 1 3 18.5v-12Z" stroke="currentColor" stroke-width="1.6"/>
+          </svg>
+          <div class="folder-meta">
+            <div class="folder-name" id="folderName"></div>
+            <div class="folder-status" id="folderStatus"></div>
+          </div>
+          <button id="folderManageBtn" class="text-btn">Manage</button>
+          <button id="folderStopBtn" class="icon-btn" title="Stop using this folder" aria-label="Stop using this folder">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M5 5L19 19M19 5L5 19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
+      </section>
+
       <div id="nowPlaying" class="now-playing" hidden>
         <div class="now-playing-label">Now playing</div>
         <div class="now-playing-title" id="nowPlayingTitle"></div>
@@ -90,5 +118,6 @@
     </div>
   </body>
   <script src="subtitleParser.js"></script>
+  <script src="folderMatcher.js"></script>
   <script src="popup.js"></script>
 </html>

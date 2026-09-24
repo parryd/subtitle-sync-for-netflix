@@ -36,6 +36,17 @@ synced to playback time and speed.
    cleared automatically. If you'd already loaded a file for that exact
    episode before (e.g. rewatching, or resuming later), it's restored
    automatically from a small local library instead of showing nothing.
+8. To avoid loading a file by hand for every episode, click "Use a
+   subtitle folder" in the popup. This opens a separate settings tab
+   (native folder pickers close extension popups immediately, so it can't
+   run inside the popup itself) where you grant access to a folder of
+   `.srt`/`.vtt` files once. From then on, whenever the popup detects an
+   episode you don't already have a file loaded for, it scans that folder,
+   matches by season/episode number (or show-name overlap as a fallback),
+   and loads the matching file automatically. Nothing is ever downloaded —
+   this only reads files already on your machine, and only when you open
+   the popup (not the instant you change episodes, since only the popup
+   context can access the folder).
 
 ## How it works
 
@@ -62,6 +73,21 @@ synced to playback time and speed.
   match clears the active subtitle so the previous episode's file can't
   linger on screen. This only ever replays a file you already loaded
   yourself — nothing is fetched from anywhere.
+- `folder-settings.html`/`.js` is a standalone extension page (opened in
+  its own tab via `chrome.tabs.create`) that calls
+  `window.showDirectoryPicker()` and stores the resulting
+  `FileSystemDirectoryHandle` in IndexedDB. It lives outside the popup
+  deliberately: Chrome extension popups close the instant they lose focus,
+  and a native OS picker dialog does exactly that, which would abort the
+  picker mid-flow.
+- `folderMatcher.js` (shared by the popup and the settings page) matches
+  the detected title against filenames in that folder: it looks for
+  season/episode markers (`S01E07`, `1x07`, a bare `E7`) in both and
+  compares them, disambiguating same-episode-number matches by show-name
+  token overlap, and falls back to pure show-name overlap when no episode
+  marker is found. `popup.js` runs this on every popup open (reading the
+  stored handle via IndexedDB, not re-prompting for folder access) and, on
+  a match, loads and saves the file exactly like a manual pick would.
 
 ## Limitations
 
