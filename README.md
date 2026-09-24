@@ -2,7 +2,10 @@
 
 **Subtitles that actually keep up with you.**
 
-Two problems, solved:
+For when Netflix doesn't have subtitles for what you're watching at all,
+or doesn't have them in the language you need — load your own file
+instead. And once you've loaded one, two problems most subtitle overlays
+have are solved:
 
 1. **Speed up the video, and your subtitles used to fall behind.** Most
    subtitle overlays run on a fixed timer, so the moment you bump playback
