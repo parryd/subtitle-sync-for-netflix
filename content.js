@@ -45,12 +45,31 @@
     return null;
   }
 
+  // When you switch episodes, whatever subtitle file was loaded for the
+  // previous one has no business staying on screen. If we've already seen
+  // this exact title before (you loaded a file for it earlier), restore
+  // that file automatically; otherwise just clear the stale one so nothing
+  // mismatched gets shown. This never fetches anything -- it only ever
+  // reapplies a file you yourself loaded through the popup at some point.
+  function reconcileSubtitleForTitle(title) {
+    chrome.storage.local.get(['subtitleLibrary'], (data) => {
+      const library = data.subtitleLibrary || {};
+      const entry = library[title];
+      if (entry) {
+        chrome.storage.local.set({ subtitleText: entry.text, subtitleName: entry.name });
+      } else {
+        chrome.storage.local.remove(['subtitleText', 'subtitleName']);
+      }
+    });
+  }
+
   function updateDetectedTitle() {
     const title = detectTitleText();
     if (title !== detectedTitle) {
       detectedTitle = title;
       if (title) {
         chrome.storage.local.set({ detectedTitle: title });
+        reconcileSubtitleForTitle(title);
       } else {
         chrome.storage.local.remove('detectedTitle');
       }

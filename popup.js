@@ -18,6 +18,7 @@ const nowPlayingTitleEl = document.getElementById('nowPlayingTitle');
 const searchSubtitlesLink = document.getElementById('searchSubtitlesLink');
 
 let offset = 0;
+let currentDetectedTitle = null;
 
 function showNowPlaying(title) {
   if (!title) {
@@ -64,6 +65,19 @@ async function loadFile(file) {
     { subtitleText: text, subtitleName: file.name },
     () => refreshStatus(file.name, cues.length)
   );
+
+  // Remember this file against whatever title is currently detected, so
+  // content.js can reapply it automatically if you come back to this same
+  // episode later instead of showing whatever the last-viewed episode left
+  // behind.
+  if (currentDetectedTitle) {
+    const title = currentDetectedTitle;
+    chrome.storage.local.get(['subtitleLibrary'], (data) => {
+      const library = data.subtitleLibrary || {};
+      library[title] = { text, name: file.name };
+      chrome.storage.local.set({ subtitleLibrary: library });
+    });
+  }
 }
 
 function init() {
@@ -82,7 +96,8 @@ function init() {
       const cueCount = data.subtitleText ? parseSubtitles(data.subtitleText).length : 0;
       refreshStatus(data.subtitleName, cueCount);
 
-      showNowPlaying(data.detectedTitle || null);
+      currentDetectedTitle = data.detectedTitle || null;
+      showNowPlaying(currentDetectedTitle);
     }
   );
 }

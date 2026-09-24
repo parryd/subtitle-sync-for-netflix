@@ -31,6 +31,11 @@ synced to playback time and speed.
    web search in a new tab for you to find and download a subtitle file
    from wherever you'd normally get one — the extension does not fetch or
    host subtitle files itself.
+7. Switching episodes no longer leaves the previous episode's subtitles
+   showing: when the detected title changes, the active subtitle is
+   cleared automatically. If you'd already loaded a file for that exact
+   episode before (e.g. rewatching, or resuming later), it's restored
+   automatically from a small local library instead of showing nothing.
 
 ## How it works
 
@@ -50,6 +55,13 @@ synced to playback time and speed.
   fallback selectors) and writes it to storage. The popup uses this only
   to build a plain web-search link — it never downloads or serves
   subtitle content on your behalf.
+- Whenever a file is loaded through the popup, it's saved into
+  `subtitleLibrary` in `chrome.storage.local`, keyed by the detected
+  title/episode string. When `content.js` sees the detected title change,
+  it looks up that key: a match reapplies the saved file automatically, no
+  match clears the active subtitle so the previous episode's file can't
+  linger on screen. This only ever replays a file you already loaded
+  yourself — nothing is fetched from anywhere.
 
 ## Limitations
 
