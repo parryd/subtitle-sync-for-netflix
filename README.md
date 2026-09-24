@@ -79,13 +79,14 @@ have are solved:
    the popup. This opens a separate settings tab (native folder pickers
    close extension popups immediately, so it can't run inside the popup
    itself) where you grant access to a folder of `.srt`/`.vtt` files once.
-   From then on, whenever the popup detects an episode you don't already
-   have a file loaded for, it scans that folder, matches by season/episode
-   number (or show-name overlap as a fallback), and loads the matching file
-   automatically. Nothing is ever downloaded — this only reads files
-   already on your machine, and only when you open the popup (not the
-   instant you change episodes, since only the popup context can access
-   the folder).
+   From then on, whenever you land on an episode you don't already have a
+   file loaded for, a background service worker scans that folder,
+   matches by season/episode number (or show-name overlap as a fallback),
+   and loads the matching file automatically — no need to open the popup
+   at all. Nothing is ever downloaded — this only reads files already on
+   your machine, using the access you already granted. If that access ever
+   needs re-confirming (e.g. Chrome revoked it), opening the popup once
+   shows a "click to reconnect" prompt.
 
 ## How it works
 
@@ -122,14 +123,22 @@ have are solved:
   deliberately: Chrome extension popups close the instant they lose focus,
   and a native OS picker dialog does exactly that, which would abort the
   picker mid-flow.
-- `folderMatcher.js` (shared by the popup and the settings page) matches
-  the detected title against filenames in that folder: it looks for
-  season/episode markers (`S01E07`, `1x07`, a bare `E7`) in both and
-  compares them, disambiguating same-episode-number matches by show-name
-  token overlap, and falls back to pure show-name overlap when no episode
-  marker is found. `popup.js` runs this on every popup open (reading the
-  stored handle via IndexedDB, not re-prompting for folder access) and, on
-  a match, loads and saves the file exactly like a manual pick would.
+- `folderMatcher.js` (shared by the popup, the settings page, and the
+  background worker) matches the detected title against filenames in that
+  folder: it looks for season/episode markers (`S01E07`, `1x07`, a bare
+  `E7`) in both and compares them, disambiguating same-episode-number
+  matches by show-name token overlap, and falls back to pure show-name
+  overlap when no episode marker is found.
+- `background.js` is the MV3 background service worker. It listens for
+  `chrome.storage.onChanged` on `detectedTitle` (written by `content.js`)
+  and, if a folder is configured and already has a granted read
+  permission, runs the same match-and-load as the popup — entirely in the
+  background, no popup needed. Permission can be *queried* without a user
+  gesture (just not *requested* fresh), which is what makes this possible;
+  if permission has lapsed, the worker just does nothing and leaves it to
+  the popup's reconnect flow. `popup.js` still runs the same logic on
+  every popup open too, both as a fallback and to surface the
+  "Auto-loaded: …" status in the UI.
 
 ## Limitations
 
