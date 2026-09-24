@@ -46,9 +46,11 @@ Two problems, solved:
 
 **From source, for development:**
 
-1. Go to `chrome://extensions`.
-2. Enable "Developer mode" (top right).
-3. Click "Load unpacked" and select this `chromeExt` folder.
+1. Clone or download this repository.
+2. Go to `chrome://extensions`.
+3. Enable "Developer mode" (top right).
+4. Click "Load unpacked" and select the folder you just cloned/downloaded
+   (the one containing `manifest.json`).
 
 ## Use it
 
