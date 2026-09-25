@@ -89,6 +89,14 @@
   }
 
   function createOverlay(container) {
+    // Defensive cleanup: if Netflix rebuilds part of the DOM around the
+    // player (observed after a long pause, e.g. near the "Next Episode"
+    // card) our old overlay can get detached without attach() noticing
+    // via a clean teardown, leaving a stale element behind. Removing any
+    // strays before creating a new one prevents two overlays rendering
+    // stacked on top of each other.
+    document.querySelectorAll('#__nf_custom_subtitle_overlay').forEach((el) => el.remove());
+
     const el = document.createElement('div');
     el.id = '__nf_custom_subtitle_overlay';
     el.style.fontSize = fontSize + 'px';
